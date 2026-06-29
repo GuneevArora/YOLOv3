@@ -146,6 +146,8 @@ class YOLOv3(nn.Module):
 def _init_weights(module):
     for m in module.modules():
         if isinstance(m, nn.Conv2d):
-            nn.init.kaiming_normal_(m.weight, a=0.1, mode="fan_in", nonlinearity="leaky_relu")
+            # Darknet's initialisation: uniform in +-sqrt(2 / fan_in).
+            bound = (2.0 / (m.weight[0].numel())) ** 0.5
+            nn.init.uniform_(m.weight, -bound, bound)
             if m.bias is not None:
                 nn.init.zeros_(m.bias)

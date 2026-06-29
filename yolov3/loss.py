@@ -17,8 +17,9 @@ class YOLOv3Loss(nn.Module):
     * Priors that are not assigned but whose predicted box overlaps some ground truth by
       more than ``ignore_thresh`` (0.5 in the paper) incur no loss at all.
     * All other priors only incur objectness loss, with target 0.
-    * Coordinates use sum of squared error on (sigmoid(tx), sigmoid(ty), tw, th);
-      objectness and classes use binary cross-entropy (no softmax).
+    * Coordinates use sum of squared error on (sigmoid(tx), sigmoid(ty), tw, th), with
+      the factor 1/2 that makes the gradient "ground truth minus prediction" as the
+      paper states; objectness and classes use binary cross-entropy (no softmax).
 
     ``xy_loss="bce"`` and ``box_scale=True`` reproduce two details of the Darknet
     implementation that the paper does not spell out: Darknet's gradient for x/y is that
@@ -79,10 +80,10 @@ class YOLOv3Loss(nn.Module):
                     t_wh = torch.log(t[:, 4:6] * img_wh / a[ai] + 1e-16)
                     scale = (2 - t[:, 4] * t[:, 5])[:, None] if self.box_scale else 1.0
                     if self.xy_loss == "mse":
-                        l_xy = l_xy + (scale * (p[:, :2].sigmoid() - t_xy) ** 2).sum()
+                        l_xy = l_xy + 0.5 * (scale * (p[:, :2].sigmoid() - t_xy) ** 2).sum()
                     else:
                         l_xy = l_xy + (scale * F.binary_cross_entropy_with_logits(p[:, :2], t_xy, reduction="none")).sum()
-                    l_wh = l_wh + (scale * (p[:, 2:4] - t_wh) ** 2).sum()
+                    l_wh = l_wh + 0.5 * (scale * (p[:, 2:4] - t_wh) ** 2).sum()
                     t_cls = F.one_hot(cls, self.num_classes).float()
                     l_cls = l_cls + F.binary_cross_entropy_with_logits(p[:, 5:], t_cls, reduction="sum")
 

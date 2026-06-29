@@ -73,8 +73,8 @@ For your own data, cluster anchors with `kmeans_anchors.py`, and pass `--list tr
   416: bicycle 0.99, dog 0.99, truck 0.91.
 
   ![detections](assets/dog_detections.jpg)
-- **Loss.** On 16 COCO images the loss at the authors' weights is about 11 per image,
-  against about 7,500 with an untrained head, so the objective agrees with the one
+- **Loss.** On 16 COCO images the loss at the authors' weights is about 10 per image,
+  against about 7,700 with an untrained head, so the objective agrees with the one
   those weights were trained on.
 
 Not verified: the paper's COCO test-dev numbers (Table 3) and a full 500k-iteration
