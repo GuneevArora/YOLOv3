@@ -59,6 +59,10 @@ python train_classifier.py --train imagenet/train --val imagenet/val --export
 python train.py --ann annotations/instances_train2014.json --images train2014/ --weights darknet53.conv.74
 ```
 
+The loss is summed over a batch and divided by the batch size, as in Darknet, so the
+default learning rate of 1e-3 assumes batch 64. With a smaller batch, scale `--lr` down
+in proportion (e.g. `--batch-size 8 --lr 1.25e-4`); at batch 8, lr 1e-3 diverges.
+
 For your own data, cluster anchors with `kmeans_anchors.py`, and pass `--list train.txt
 --num-classes N` (Darknet format: one image path per line, labels in the parallel
 `labels/` directory as `class cx cy w h`, normalised).
@@ -76,6 +80,10 @@ For your own data, cluster anchors with `kmeans_anchors.py`, and pass `--list tr
 - **Loss.** On 16 COCO images the loss at the authors' weights is about 10 per image,
   against about 7,700 with an untrained head, so the objective agrees with the one
   those weights were trained on.
+- **Training.** A 600-iteration CPU run on a 128-image COCO subset, starting from the
+  pretrained backbone (batch 8, 320 px, lr 1.25e-4), took the loss from about 5,400 to
+  about 40 and reached AP50 0.24 / AP 0.09 on those same training images. This shows
+  the training path learns; it says nothing about accuracy on held-out data.
 
 Not verified: the paper's COCO test-dev numbers (Table 3) and a full 500k-iteration
 training run. Neither COCO nor a GPU was available where this was written; only a
